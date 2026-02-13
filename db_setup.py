@@ -9,17 +9,13 @@ conn = sqlite3.connect(data_root + "test.db")
 cur = conn.cursor()
 
 # Nutrition datasets
-food = pd.read_csv(nutrients_root + "food.csv")
-branded_food = pd.read_csv(nutrients_root + "branded_food.csv")
-food_nutrient = pd.read_csv(nutrients_root + "food_nutrient.csv")
+food = pd.read_csv(nutrients_root + "food.csv", usecols=['fdc_id', 'description', 'publication_date'])
+branded_food = pd.read_csv(nutrients_root + "branded_food.csv", usecols=['fdc_id', 'brand_owner', 'brand_name', 'subbrand_name', 'gtin_upc', 'serving_size', 'serving_size_unit', 'market_country'])
+food_nutrient = pd.read_csv(nutrients_root + "food_nutrient.csv", usecols=['id', 'fdc_id', 'nutrient_id', 'amount'])
 nutrient = pd.read_csv(nutrients_root + "nutrient.csv")
 
 # Merge the food (name) and branded_food (brand info) datasets
-food = food.drop(columns=["market_country","trade_channel","microbe_data"])
-branded_food = branded_food.drop(columns=["not_a_significant_source_of", "household_serving_fulltext", "branded_food_category", "data_source", "package_weight", "preparation_state_code", "trade_channel", "short_description"])
 food = pd.merge(food, branded_food, on='fdc_id')
-
-food_nutrient = food_nutrient.drop(columns=["data_points","derivation_id","min","max","median","footnote","min_year_acquired"])
 
 food.to_sql("food", conn, if_exists="replace", index=False)
 food_nutrient.to_sql("food_nutrient", conn, if_exists="replace", index=False)
@@ -29,8 +25,6 @@ conn.commit()
 # Price datasets
 walmart_price = pd.read_csv(data_root + "WMT_Grocery_202209.csv")
 walmart_price.columns = walmart_price.columns.str.lower()
-
-# walmart_price = walmart_price.drop(columns=['product_url'])
 
 walmart_price.to_sql("walmart_price", conn, if_exists="replace", index=False)
 conn.commit()
