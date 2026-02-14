@@ -5,7 +5,7 @@ data_root = "./data/"
 nutrients_root = data_root + "nutrients/"
 
 # Connect to the database
-conn = sqlite3.connect(data_root + "test.db")
+conn = sqlite3.connect(data_root + "nutrition.db")
 cur = conn.cursor()
 
 # Nutrition datasets
