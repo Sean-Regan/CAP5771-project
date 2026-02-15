@@ -1,0 +1,13 @@
+We began by researching datasets for the nutritional information of food items, quickly finding an official usda nutrition dataset
+at https://fdc.nal.usda.gov/download-datasets. The 'branded foods' dataset contains information on the product, brand, brand owner,
+nutritional info, and several other useful pieces of information.
+
+Due to the large variety of prices between grocery stores, we needed to find separate datasets for each grocery store we wanted to
+include in the project. After searching kaggle, we were able to find one for Walmart at 
+https://www.kaggle.com/datasets/thedevastator/product-prices-and-sizes-from-walmart-grocery, but were unable to find datasets for
+other grocery chains such as Publix or Whole Foods. Instead, we decided to scrape price and brand information from the Whole Foods
+website using the 'whole-foods-scraper.py' script we created.
+
+While we could similarly scrape information from other grocery chains, we decided to focus on Walmart and Whole Foods (at least for
+the start of the project) as they represent both a low-cost store and high-cost store. If time allows, including data sets for Publix,
+Aldi's, or Trader Joe's would allow for a greater range of comparison between individual products and the chains as a whole.
