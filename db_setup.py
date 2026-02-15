@@ -1,6 +1,11 @@
 import pandas as pd
 import sqlite3
 
+# Change depending on necessity
+do_nutrient = False
+do_walmart = False
+do_wholefoods = True
+
 data_root = "./data/"
 nutrients_root = data_root + "nutrients/"
 
@@ -9,37 +14,46 @@ conn = sqlite3.connect(data_root + "nutrition.db")
 cur = conn.cursor()
 
 # Nutrition datasets
-food = pd.read_csv(nutrients_root + "food.csv", usecols=['fdc_id', 'description', 'publication_date'])
-branded_food = pd.read_csv(nutrients_root + "branded_food.csv", usecols=['fdc_id', 'brand_owner', 'brand_name', 'subbrand_name', 'gtin_upc', 'serving_size', 'serving_size_unit', 'market_country'])
-food_nutrient = pd.read_csv(nutrients_root + "food_nutrient.csv", usecols=['id', 'fdc_id', 'nutrient_id', 'amount'])
-nutrient = pd.read_csv(nutrients_root + "nutrient.csv")
+if do_nutrient:
+    food = pd.read_csv(nutrients_root + "food.csv", usecols=['fdc_id', 'description', 'publication_date'])
+    branded_food = pd.read_csv(nutrients_root + "branded_food.csv", usecols=['fdc_id', 'brand_owner', 'brand_name', 'subbrand_name', 'gtin_upc', 'serving_size', 'serving_size_unit', 'market_country'])
+    food_nutrient = pd.read_csv(nutrients_root + "food_nutrient.csv", usecols=['id', 'fdc_id', 'nutrient_id', 'amount'])
+    nutrient = pd.read_csv(nutrients_root + "nutrient.csv")
 
-# Merge the food (name) and branded_food (brand info) datasets
-food = pd.merge(food, branded_food, on='fdc_id')
+    # Merge the food (name) and branded_food (brand info) datasets
+    food = pd.merge(food, branded_food, on='fdc_id')
 
-food.to_sql("food", conn, if_exists="replace", index=False)
-food_nutrient.to_sql("food_nutrient", conn, if_exists="replace", index=False)
-nutrient.to_sql("nutrient", conn, if_exists="replace", index=False)
-conn.commit()
+    food.to_sql("food", conn, if_exists="replace", index=False)
+    food_nutrient.to_sql("food_nutrient", conn, if_exists="replace", index=False)
+    nutrient.to_sql("nutrient", conn, if_exists="replace", index=False)
 
-# Price datasets
-walmart_price = pd.read_csv(data_root + "WMT_Grocery_202209.csv")
-walmart_price.columns = walmart_price.columns.str.lower()
+    # Delete duplicates
+    cur.execute("""
+                DELETE FROM food
+                WHERE rowid NOT IN (
+                    SELECT rowid
+                    FROM food
+                    GROUP BY gtin_upc
+                    HAVING (COUNT(*) = 1 OR MAX(publication_date))
+                )
+                """)
+    conn.commit()
 
-walmart_price.to_sql("walmart_price", conn, if_exists="replace", index=False)
-conn.commit()
+# Walmart price dataset
+if do_walmart:
+    walmart_price = pd.read_csv(data_root + "WMT_Grocery_202209.csv")
+    walmart_price.columns = walmart_price.columns.str.lower()
 
-# Delete duplicates
-cur.execute("""
-            DELETE FROM food
-            WHERE rowid NOT IN (
-                SELECT rowid
-                FROM food
-                GROUP BY gtin_upc
-                HAVING (COUNT(*) = 1 OR MAX(publication_date))
-            )
-            """)
-conn.commit()
+    walmart_price.to_sql("walmart_price", conn, if_exists="replace", index=False)
+    conn.commit()
+
+# Whole Foods price dataset
+if do_wholefoods:
+    wholefoods_price = pd.read_csv(data_root + "scraped_wf_data.csv")
+    wholefoods_price['price'] = wholefoods_price['price'].str.lstrip('$').astype(float)
+
+    wholefoods_price.to_sql("wholefoods_price", conn, if_exists="replace")
+    conn.commit()
 
 # Close the connection
 conn.close()
