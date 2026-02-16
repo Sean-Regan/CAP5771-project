@@ -1,0 +1,12 @@
+We began designing the database around the usda 'branded food' nutrient datasets, which contained product names, brand info,
+and nutrient amounts. Product descriptions, brand info, gtin/upc numbers, and serving sizes were put together into a 'food'
+table. Nutrient information were stored in a seperate 'food_nutrient' table with an entry for each different nutrient of each
+food item in the food table. An fdc_id is used across all nutrient tables to identify each unique food. Finally, a 'nutrient'
+table contains information about the nutrient types and measuring units used in the 'food_nutrient' table.
+
+For pricing information, the kaggle Walmart dataset and the scraped Whole Foods dataset were each made into individual tables:
+'walmart_price' and 'wholefoods_price'. Both tables contain product names, prices, zip codes, and brand names, with the Walmart
+table containing additional information on categories, subcategories, product sizes, and internal sku numbers.
+
+While the product names across the nutrient table and price tables are not standardized, we plan to use lexical similarity 
+between the product names and brand names to pair entries.
