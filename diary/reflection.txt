@@ -1,0 +1,9 @@
+Starting with the data visualization done during the Data Exploration phase, there already seems to be a decent basis to
+compare the prices across the two grocery stores. The only limitation on this would be that we have yet to run the Whole
+Foods scraper for a longer period of time (accidentally overwrote it once whoops) so the current scraped dataset is 
+somewhat small, especially compared to the larger Walmart dataset. 
+
+As for further steps, comparisons with regards to nutrients will need to be done in regards to specific products, with a
+lexical similarity algorithm of some sort matching the product name and brand in the price datasets to the nutritional
+information in the usda nutrient datasets. From there, we will standardize the amount of nutrients based on the price,
+allowing direct comparison between brands, stores, and locations
