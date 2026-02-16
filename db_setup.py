@@ -2,7 +2,7 @@ import pandas as pd
 import sqlite3
 
 # Change depending on necessity
-do_nutrient = True
+do_nutrient = False
 do_walmart = False
 do_wholefoods = False
 

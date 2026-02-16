@@ -1,0 +1,13 @@
+Some of our first ideas for the project were focused on media recommendations or language study. We ended up
+discarding several of these due to wanting something more impactful and relevant to someone's everyday life.
+We came upon the idea of nutrition while brainstorming and developed it further as it was simple yet highly 
+relevant, especially due to rising grocery prices in recent times. Additionally, one of the group member's
+girlfriend is a food science minor and is quite knowledgeable on the subject nutrition.
+
+While directly comparing nutritional value to price point seemed potentially too simple at first, we found several 
+other means of comparison that allowed us to increase the scope of the project. These included geographical location,
+food type, grocery chain, type of nutrient, brand, and other additional info provided in the datasets. Our output
+will be displayed as a comparison between the nutrient to price ratio (for each individual nutrient) of different
+brands of food across a singular type of food item. For example, comparing Whole Foods brand granola bars and
+Great Value brand granola bars, with additionaly comparisons available between different zip codes and other
+relevant metrics.
