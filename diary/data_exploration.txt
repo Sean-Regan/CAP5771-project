@@ -1,0 +1,39 @@
+Data exploration began by looking at the null values across the tables. Perhaps due to the size
+of the dataset, the 'food' table contains several columns with large amounts of null values 
+(description, brand_owner, brand_name, subbrand_name, serving_size, and serving_size_unit). While
+many of these null values can be ignored for most comparisons, the product description is the
+only way of identifying what the product is so any rows with missing descriptions were dropped.
+
+The 'food_nutrient' table had no null values while the 'nutrient' table only had a few null
+values in the nutrient_nbr and rank columns which are unimportant and do not affect comparisons.
+
+Both price datasets ('walmart_price' and 'wholefoods_price' tables) contained some rows with null
+values for prices which had to be dropped but otherwise only had nulls in less relevant columns
+or no nulls at all.
+
+For data visualization, the main focus was on the amount of products by brand and overall price
+comparisons as the nutrient information varies greatly depending on the type of food and isn't
+very easy to generalize except by direct comparison. The 'food' table seemed to contain a large
+variety of brands, with Great Value brand as the number one by about 1000 entries followed by
+several other brands with 3000-6000 products each. The 'walmart_price' and 'wholefoods_price'
+tables had similar distributions of branded products as both were dominantly their Great Value
+and Whole Foods brands respectively.
+
+In terms of average pricing across brands, both Great Value and Whole Foods brands had an
+average price of around $4. However, this isn't the greatest statistic to look at for general
+comparisons as each brand has a large variety of products. Other brands with high average prices
+include Starbucks, Navitas Organics, Sam's Choice, Jimmy Dean, and Natierra, in no particular 
+order.
+
+As the 'walmart_price' table included a category column, we compared the average price across 
+categories as well. Unsuprisingly, canned goods were the lowest average price while coffe was
+the highest.
+
+Finally, the distribution of prices across both datasets was graphed. The majority of Walmart
+products were between $0 and $5 while the majority of Whole Foods products were between $0 and
+$10, indicating an overall higher average price for Whole Foods products. However, this could be
+due to the presence of higher price point items instead of specific items being higher priced.
+
+To directly compare a specific item across both stores, we graphed the price of lettuce using
+a histogram. The Walmart lettuc ranged from $1.5 to $4 with the majority being in the $2-$3.5
+range, while the Whole Foods lettuce ranged about evenly from $3-$4.
