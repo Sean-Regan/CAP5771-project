@@ -19,11 +19,10 @@ from selenium.webdriver.common.keys import Keys
 TARGET_URL = "https://www.wholefoodsmarket.com"
 ITEM_SEARCHES_FILE = "food_no_dupes.csv"
 ZIP_CODES_FILE = "zip_codes.txt"
-OUTPUT_FILE = "scraped_wf_data.csv"
+OUTPUT_FILE = "data/scraped_wf_data.csv"
 FIREFOX_INSTALL_LOC = pathlib.Path("C:\\Program Files\\Mozilla Firefox\\firefox.exe")
 MAX_ITEM_SEARCHES_PER_ZIP_CODE = 10000
 SEARCH_OFFSET = 0
-PER_BOOK_DELAY_SECONDS = 3
 
 
 def wait_iter_loop(driver: webdriver.Firefox, by: By, target_element: str, number_of_iterations: int = 10) -> Union[webelement.WebElement, None]:
