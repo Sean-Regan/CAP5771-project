@@ -2,9 +2,9 @@ import pandas as pd
 import sqlite3
 
 # Change depending on necessity
-do_nutrient = False
-do_walmart = False
-do_wholefoods = False
+do_nutrient = True
+do_walmart = True
+do_wholefoods = True
 
 data_root = "./data/"
 nutrients_root = data_root + "nutrients/"
