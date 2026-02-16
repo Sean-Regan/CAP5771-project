@@ -21,7 +21,8 @@ ITEM_SEARCHES_FILE = "food_no_dupes.csv"
 ZIP_CODES_FILE = "zip_codes.txt"
 OUTPUT_FILE = "scraped_wf_data.csv"
 FIREFOX_INSTALL_LOC = pathlib.Path("C:\\Program Files\\Mozilla Firefox\\firefox.exe")
-MAX_ITEM_SEARCHES_PER_ZIP_CODE = 10
+MAX_ITEM_SEARCHES_PER_ZIP_CODE = 10000
+SEARCH_OFFSET = 0
 PER_BOOK_DELAY_SECONDS = 3
 
 
@@ -57,8 +58,7 @@ def main():
     items_df = pd.read_csv(ITEM_SEARCHES_FILE)
     item_searches = items_df.description.to_list()
 
-    random.shuffle(item_searches)
-    item_searches = item_searches[:min(len(item_searches), MAX_ITEM_SEARCHES_PER_ZIP_CODE)]
+    item_searches = item_searches[min(len(item_searches), SEARCH_OFFSET):min(len(item_searches), MAX_ITEM_SEARCHES_PER_ZIP_CODE)]
 
     if not pathlib.Path(OUTPUT_FILE).exists():
         with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
@@ -96,6 +96,7 @@ def main():
             time.sleep(1)
 
     for zip_code in zip_codes:
+        zip_code = zip_code.replace('\n', '')
         print(f"Selecting: {zip_code}")
 
         top_level_location_btn = driver.find_element(By.XPATH, "//html/body/div/header/nav/div/div[2]/button/div/div[2]")
@@ -179,7 +180,14 @@ def main():
 
             brand = driver.find_element(By.XPATH, "//html/body/div/main/div[2]/div[2]/div[1]").text
             product_name = driver.find_element(By.XPATH, "//html/body/div/main/div[2]/div[2]/div[2]").text
-            price = driver.find_element(By.XPATH, "//html/body/div/main/div[2]/div[2]/div[3]/span[1]").text
+            item_price = wait_iter_loop(driver, By.XPATH, "//html/body/div/main/div[2]/div[2]/div[3]/span[1]")
+            est_price = wait_iter_loop(driver, By.XPATH, "//html/body/div/main/div[2]/div[2]/div[3]/div/div/span[2]")
+            price = None
+            if item_price is not None:
+                price = item_price.text
+            elif item_price is not None:
+                price = est_price.text
+
             sale_price = None
             snap_eligible = False
 
@@ -198,7 +206,7 @@ def main():
             except NoSuchElementException:
                 pass
 
-            with open('scraped.csv', 'a', encoding='utf-8') as f:
+            with open(OUTPUT_FILE, 'a', encoding='utf-8') as f:
                 f.write(f'{zip_code},"{brand}","{product_name}",{price},{sale_price},{snap_eligible}\n')
 
     print("Done.")
