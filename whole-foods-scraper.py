@@ -184,7 +184,7 @@ def main():
             price = None
             if item_price is not None:
                 price = item_price.text
-            elif item_price is not None:
+            elif est_price is not None:
                 price = est_price.text
 
             sale_price = None
