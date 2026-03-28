@@ -51,7 +51,10 @@ if do_walmart:
 # Whole Foods price dataset
 if do_wholefoods:
     wholefoods_price = pd.read_csv(data_root + "scraped_wf_data.csv", usecols=['zip_code', 'brand', 'product_name', 'price'])
-    wholefoods_price['price'] = wholefoods_price['price'].str.lstrip('$').astype(float)
+    wholefoods_price['price'] = wholefoods_price['price'].str.lstrip('$').astype(float, errors='ignore')
+
+    wholefoods_price = wholefoods_price.drop_duplicates()
+    wholefoods_price = wholefoods_price.dropna()
 
     wholefoods_price.to_sql("wholefoods_price", conn, if_exists="replace", index=False)
     conn.commit()
