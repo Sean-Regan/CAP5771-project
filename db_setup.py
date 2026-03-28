@@ -2,8 +2,8 @@ import pandas as pd
 import sqlite3
 
 # Change depending on necessity
-do_nutrient = True
-do_walmart = True
+do_nutrient = False
+do_walmart = False
 do_wholefoods = True
 
 data_root = "./data/"
@@ -51,12 +51,21 @@ if do_walmart:
 # Whole Foods price dataset
 if do_wholefoods:
     wholefoods_price = pd.read_csv(data_root + "scraped_wf_data.csv", usecols=['zip_code', 'brand', 'product_name', 'price'])
-    wholefoods_price['price'] = wholefoods_price['price'].str.lstrip('$').astype(float, errors='ignore')
+    wholefoods_price['price'] = wholefoods_price['price'].str.lstrip('$')
+    wholefoods_price['price'] = pd.to_numeric(wholefoods_price['price'], errors='coerce')
 
     wholefoods_price = wholefoods_price.drop_duplicates()
     wholefoods_price = wholefoods_price.dropna()
 
+
     wholefoods_price.to_sql("wholefoods_price", conn, if_exists="replace", index=False)
+
+    # Delete 0.00 prices
+    cur.execute("""
+                DELETE FROM wholefoods_price
+                WHERE price = 0
+                """)
+
     conn.commit()
 
 # Close the connection
