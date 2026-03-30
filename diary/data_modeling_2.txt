@@ -1,0 +1,3 @@
+What evaluation metrics did you choose and why are they appropriate for your problem?
+How does your model compare to the baseline?
+What does feature importance suggest about the patterns your model is using?
