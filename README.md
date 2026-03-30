@@ -33,8 +33,12 @@ If you write your own searches, ensure each search is on its own line, with the 
 The script will perform all searches in the range `[SEARCH_OFFSET, MAX_ITEM_SEARCHES_PER_ZIP_CODE]` for each zip code.
 You can modify bounds as you see fit by modifying those constants.
 
-## Running the Jupyter Notebook
+## Running the Milestone1 Jupyter Notebook
 - see above 'Generating DB' section to generate the database used
 - ensure all requirements in 'requirements.txt' are met
 - open 'milestone1.ipynb', 'Restart' the notebook if available, then 'Run All' to run all cells
 - if you wish to run them individually, the first code cell is necessary to run others and the last cell closes the database
+
+## Running the Milestone2 Jupyter Notebooks
+- same as above, instead opening and running 'data_wrangling.ipynb', then 'data_modeling.ipynb', then 'data_visualization_static.ipynb'
+- note that the first time running might take quite a while depending on your machine
