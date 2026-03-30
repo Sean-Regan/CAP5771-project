@@ -1,3 +1,6 @@
-What evaluation metrics did you choose and why are they appropriate for your problem?
-How does your model compare to the baseline?
-What does feature importance suggest about the patterns your model is using?
+Since we are clustering to find outliers in given nutrients/localities, we aren't evaluating our model for bias/variance,
+rather we are using it to examine patterns.
+Similarly, our model doesn't really have a baseline to compare against since it is built around clustering.
+
+In order for our clusters to capture anomalies independent of regional variance, we need to be able to ensure the model generalizes well to all areas.
+Thus, we actually want to fit our regressor with all of our data, so we can pick apart and cluster points that have greater variation in their neighborhoods.

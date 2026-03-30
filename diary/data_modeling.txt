@@ -1,4 +1,13 @@
-Which model(s) did you choose to try first, and why?
-Explain your reasoning in terms of the problem type (regression vs classification), interpretability, complexity, and data size.
-What assumptions does your model make about the data?
-What split will you decide for your train/validation/test? whay?
+Our data doesn't lend itself strongly to any measure of categorization/prediction, rather we are focused more on clustering to find and visualize distinct patterns
+in the data itself.
+
+Originally, we used OPTICS for clustering, but given the dimensionality of our data, KMeans was more than enough for visualizing simple patterns.
+Since we are pulling in zip codes we assume that locality will matter somewhat for the outputs of our clustering, as well as nutrient types.
+
+To find our clusters, we fit a regression model (to predict price based on features (nutriend id, lat/lon of the price, store, and brand)) and then 
+clustering the residual differences between the predicted prices and actual prices.
+This allows us to determine the if there are disparities from the local norm for each nutrient (since prices 
+will always change between areas, but should follow patterns that would be modeled in the regression), and allows us to cluster 
+based on the magnitude of these differences.
+
+Since we are clustering, and not predicting or categorizing, we don't have a need for train/validation/test splitting.
