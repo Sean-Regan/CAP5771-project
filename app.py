@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 MAPBOX_API_KEY = os.getenv('MAPBOX_API_KEY')
+ENDPOINT = "http://localhost:8000"
 
 # Connect to the database
 conn = sqlite3.connect("./data/nutrition.db")
@@ -19,7 +20,7 @@ CORS(app)
 
 @app.route('/')
 def home():
-    return render_template('index.html', MAPBOX_API_KEY=MAPBOX_API_KEY)
+    return render_template('index.html', MAPBOX_API_KEY=MAPBOX_API_KEY, ENDPOINT=ENDPOINT)
 
 @app.route('/api/get-clusters.geojson')
 def api_get_clusters():
