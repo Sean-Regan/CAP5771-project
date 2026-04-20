@@ -21,5 +21,22 @@ def api_get_clusters():
     # Temporary
     get_clusters()
 
+@app.route('/api/nutrition')
+def api_get_nutrition_info():
+    search_name = request.args.get('name')
+    search_brand = request.args.get('brand')
+
+    wal_df = pd.read_sql_query("""
+                       SELECT price_retail
+                       FROM walmart_price
+                       WHERE product_name LIKE ? AND brand LIKE ?
+                       """, conn, params=(f"%{search_name.value}%", f"%{search_brand.value}%"))
+    
+    wf_df = pd.read_sql_query("""
+                       SELECT price
+                       FROM wholefoods_price
+                       WHERE product_name LIKE ? AND brand LIKE ?
+                       """, conn, params=(f"%{search_name.value}%", f"%{search_brand.value}%"))
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000)
