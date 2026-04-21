@@ -87,18 +87,12 @@ def create_clusters(conn):
 
     global_preds = global_model.predict(X_glob)
     encoded_nutrients['global_residual'] = y_glob - global_preds
-    
-    global_residuals = encoded_nutrients.global_residual
-    encoded_nutrients['global_residual_norm'] = (global_residuals - global_residuals.min()) / (global_residuals.max() - global_residuals.min())
 
     # CLUSTER RESIDUALS FOR DEVIATIONS
     global_residuals = encoded_nutrients[['global_residual']].values
-    global_residuals_norm = encoded_nutrients[['global_residual_norm']].values
 
     kmeans = KMeans(n_clusters=30, random_state=42)
     encoded_nutrients['global_residual_cluster'] = kmeans.fit_predict(global_residuals)
-    kmeans = KMeans(n_clusters=30, random_state=42)
-    encoded_nutrients['global_residual_cluster_norm'] = kmeans.fit_predict(global_residuals_norm)
 
     def group_process(group_df):
         X_loc = group_df[['nutrient_id', 'brand_owner_encoded', 'source_wf', 'source_wal', 'latitude', 'longitude']]
@@ -129,7 +123,7 @@ def create_clusters(conn):
     kmeans = KMeans(n_clusters=30, random_state=42)
     encoded_nutrients['loc_cluster_norm'] = kmeans.fit_predict(normalized_loc_residuals)
 
-    finalized_nutrients = encoded_nutrients[['nutrient_id', 'price', 'latitude', 'longitude', 'global_residual_cluster', 'global_residual_cluster_norm', 'loc_cluster', 'loc_cluster_norm']]
+    finalized_nutrients = encoded_nutrients[['nutrient_id', 'price', 'latitude', 'longitude', 'global_residual_cluster', 'loc_cluster', 'loc_cluster_norm']]
     finalized_nutrients.to_sql(name='finalized_nutrients', con=conn, if_exists='replace', index=False)
 
     global nutrients_arr
@@ -161,7 +155,6 @@ def get_clusters(max_clusters=500):
         lat = row.latitude
         lon = row.longitude
         global_cluster = row.global_residual_cluster
-        global_cluster_norm = row.global_residual_cluster_norm
         local_cluster = row.loc_cluster
         local_cluster_norm = row.loc_cluster_norm
         features_list.append({
@@ -175,7 +168,6 @@ def get_clusters(max_clusters=500):
                 "price": float(price),
                 "globalCluster": int(global_cluster),
                 "localCluster": int(local_cluster),
-                "globalClusterNorm": int(global_cluster_norm),
                 "localClusterNorm": int(local_cluster_norm)
             }
         })

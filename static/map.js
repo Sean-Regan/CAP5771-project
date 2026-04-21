@@ -56,27 +56,6 @@ const loadMap = () => {
         });
 
         map.addLayer({
-            'id': 'global-norm-layer',
-            'type': 'circle',
-            'source': 'clusters-source',
-            'layout': { 'visibility': 'none' },
-            'paint': {
-                'circle-radius': 6,
-                'circle-color': [
-                    'interpolate',
-                    ['linear'],
-                    ['get', 'globalClusterNorm'],
-                    0, '#f80404',
-                    30, '#46c2f0',
-
-                ],
-                // 'circle-color': '#46c2f0',
-                'circle-stroke-width': 2,
-                'circle-stroke-color': 'white'
-            }
-        });
-
-        map.addLayer({
             'id': 'local-layer',
             'type': 'circle',
             'source': 'clusters-source',
@@ -120,7 +99,7 @@ const loadMap = () => {
     });
 
     map.on('idle', () => {
-        const toggleableLayerIds = ['local-norm-layer', 'local-layer', 'global-norm-layer', 'global-layer'];
+        const toggleableLayerIds = ['local-norm-layer', 'local-layer', 'global-layer'];
         const defaultLayer = 'global-layer';
         for (const id of toggleableLayerIds) {
             const linkId = `${id}`
