@@ -24,8 +24,8 @@ const loadMap = () => {
 
     const map = new mapboxgl.Map({
         container: 'map', // container ID
-        center: [-71.06776, 42.35816], // starting position [lng, lat]. Note that lat must be set between -90 and 90
-        zoom: 9 // starting zoom
+        center: [-98.5765, 39.828175], // starting position [lng, lat]. Note that lat must be set between -90 and 90
+        zoom: 3 // starting zoom
     });
 
     map.on('load', () => {
@@ -35,15 +35,16 @@ const loadMap = () => {
         });
 
         map.addLayer({
-            'id': 'circle-layer',
+            'id': 'global-layer',
             'type': 'circle',
             'source': 'clusters-source',
+            'layout': { 'visibility': 'visible' },
             'paint': {
                 'circle-radius': 6,
                 'circle-color': [
                     'interpolate',
                     ['linear'],
-                    ['get', 'cluster'],
+                    ['get', 'globalCluster'],
                     0, '#f80404',
                     30, '#46c2f0',
 
@@ -53,5 +54,123 @@ const loadMap = () => {
                 'circle-stroke-color': 'white'
             }
         });
-    })
+
+        map.addLayer({
+            'id': 'global-norm-layer',
+            'type': 'circle',
+            'source': 'clusters-source',
+            'layout': { 'visibility': 'none' },
+            'paint': {
+                'circle-radius': 6,
+                'circle-color': [
+                    'interpolate',
+                    ['linear'],
+                    ['get', 'globalClusterNorm'],
+                    0, '#f80404',
+                    30, '#46c2f0',
+
+                ],
+                // 'circle-color': '#46c2f0',
+                'circle-stroke-width': 2,
+                'circle-stroke-color': 'white'
+            }
+        });
+
+        map.addLayer({
+            'id': 'local-layer',
+            'type': 'circle',
+            'source': 'clusters-source',
+            'layout': { 'visibility': 'none' },
+            'paint': {
+                'circle-radius': 6,
+                'circle-color': [
+                    'interpolate',
+                    ['linear'],
+                    ['get', 'localCluster'],
+                    0, '#f80404',
+                    30, '#46c2f0',
+
+                ],
+                // 'circle-color': '#46c2f0',
+                'circle-stroke-width': 2,
+                'circle-stroke-color': 'white'
+            }
+        });
+        
+        map.addLayer({
+            'id': 'local-norm-layer',
+            'type': 'circle',
+            'source': 'clusters-source',
+            'layout': { 'visibility': 'none' },
+            'paint': {
+                'circle-radius': 6,
+                'circle-color': [
+                    'interpolate',
+                    ['linear'],
+                    ['get', 'localClusterNorm'],
+                    0, '#f80404',
+                    30, '#46c2f0',
+
+                ],
+                // 'circle-color': '#46c2f0',
+                'circle-stroke-width': 2,
+                'circle-stroke-color': 'white'
+            }
+        });        
+    });
+
+    map.on('idle', () => {
+        const toggleableLayerIds = ['local-norm-layer', 'local-layer', 'global-norm-layer', 'global-layer'];
+        const defaultLayer = 'global-layer';
+        for (const id of toggleableLayerIds) {
+            const linkId = `${id}`
+            
+            const undashed = id.replace(/-/g, ' ');
+            const linkText = undashed.replace(/\w\S*/g, text => text.charAt(0).toUpperCase() + text.substring(1).toLowerCase());
+            
+            if (!map.getLayer(id)) {
+                return;
+            }
+
+            if (document.getElementById(linkId)) {
+                continue;
+            }
+
+            const link = document.createElement('a');
+            link.id = linkId;
+            link.href = '#';
+            link.textContent = linkText;
+            if (id === defaultLayer) {
+                link.className = 'active';
+            } else {
+                link.className = '';
+            }
+
+            link.onclick = (e) => {
+                const clickedLayer = link.id;
+                e.preventDefault();
+                e.stopPropagation();
+
+                const otherLayerIds = toggleableLayerIds.filter((val, _) => val !== linkId);
+                for (const otherId of otherLayerIds) {
+                    const otherElement = document.getElementById(otherId);
+                    if (otherElement instanceof HTMLAnchorElement) {
+                        otherElement.className = '';
+                    }
+
+                    map.setLayoutProperty(otherId, 'visibility', 'none')
+                }
+
+                link.className = 'active';
+                map.setLayoutProperty(
+                    clickedLayer,
+                    'visibility',
+                    'visible'
+                );  
+            }
+
+            const layers = document.getElementById('map-overlay');
+            layers.appendChild(link);
+        }
+    });
 };

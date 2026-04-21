@@ -79,24 +79,57 @@ def create_clusters(conn):
     encoded_nutrients = encoded_nutrients.dropna()
 
     # CALCULATE RESIDUALS
-    X = encoded_nutrients[['nutrient_id', 'brand_owner_encoded', 'source_wf', 'source_wal', 'latitude', 'longitude']]
-    y = encoded_nutrients['price']
+    X_glob = encoded_nutrients[['nutrient_id', 'brand_owner_encoded', 'source_wf', 'source_wal', 'latitude', 'longitude']]
+    y_glob = encoded_nutrients['price']
 
-    encoded_nutrients.to_sql("encoded_nutrients", conn, if_exists='replace', index=False)
+    global_model = RandomForestRegressor()
+    global_model.fit(X_glob, y_glob)
 
-    model = RandomForestRegressor()
-    model.fit(X, y)
-
-    preds = model.predict(X)
-    encoded_nutrients['residual'] = y - preds
+    global_preds = global_model.predict(X_glob)
+    encoded_nutrients['global_residual'] = y_glob - global_preds
+    
+    global_residuals = encoded_nutrients.global_residual
+    encoded_nutrients['global_residual_norm'] = (global_residuals - global_residuals.min()) / (global_residuals.max() - global_residuals.min())
 
     # CLUSTER RESIDUALS FOR DEVIATIONS
-    residuals = encoded_nutrients[['residual', 'latitude', 'longitude']].values
+    global_residuals = encoded_nutrients[['global_residual']].values
+    global_residuals_norm = encoded_nutrients[['global_residual_norm']].values
 
     kmeans = KMeans(n_clusters=30, random_state=42)
-    encoded_nutrients['residual_cluster'] = kmeans.fit_predict(residuals)
+    encoded_nutrients['global_residual_cluster'] = kmeans.fit_predict(global_residuals)
+    kmeans = KMeans(n_clusters=30, random_state=42)
+    encoded_nutrients['global_residual_cluster_norm'] = kmeans.fit_predict(global_residuals_norm)
 
-    finalized_nutrients = encoded_nutrients[['nutrient_id', 'price', 'latitude', 'longitude', 'residual_cluster']]
+    def group_process(group_df):
+        X_loc = group_df[['nutrient_id', 'brand_owner_encoded', 'source_wf', 'source_wal', 'latitude', 'longitude']]
+        y_loc = group_df['price']
+
+        model = RandomForestRegressor()
+        model.fit(X_loc, y_loc)
+
+        preds_loc = model.predict(X_loc)
+        group_df['residual_loc'] = y_loc - preds_loc
+
+        residuals = group_df.residual_loc
+        if residuals.unique().shape[0] > 1:
+            norm = (residuals - residuals.min()) / (residuals.max() - residuals.min())
+        else:
+            norm = 0
+        group_df['residual_loc_normalized'] = norm
+
+        return group_df
+    
+    encoded_nutrients = encoded_nutrients.groupby(['zip_code'], group_keys=True).apply(group_process)
+
+    residuals = encoded_nutrients[['residual_loc']].dropna().values
+    kmeans = KMeans(n_clusters=30, random_state=42)
+    encoded_nutrients['loc_cluster'] = kmeans.fit_predict(residuals)
+    
+    normalized_loc_residuals = encoded_nutrients[['residual_loc_normalized']].dropna().values
+    kmeans = KMeans(n_clusters=30, random_state=42)
+    encoded_nutrients['loc_cluster_norm'] = kmeans.fit_predict(normalized_loc_residuals)
+
+    finalized_nutrients = encoded_nutrients[['nutrient_id', 'price', 'latitude', 'longitude', 'global_residual_cluster', 'global_residual_cluster_norm', 'loc_cluster', 'loc_cluster_norm']]
     finalized_nutrients.to_sql(name='finalized_nutrients', con=conn, if_exists='replace', index=False)
 
     global nutrients_arr
@@ -127,7 +160,10 @@ def get_clusters(max_clusters=500):
         price = row.price
         lat = row.latitude
         lon = row.longitude
-        cluster = row.residual_cluster
+        global_cluster = row.global_residual_cluster
+        global_cluster_norm = row.global_residual_cluster_norm
+        local_cluster = row.loc_cluster
+        local_cluster_norm = row.loc_cluster_norm
         features_list.append({
             "type": "Feature",
             "geometry": {
@@ -137,7 +173,10 @@ def get_clusters(max_clusters=500):
             "properties": {
                 "nutrient": int(nutrient),
                 "price": float(price),
-                "cluster": int(cluster)
+                "globalCluster": int(global_cluster),
+                "localCluster": int(local_cluster),
+                "globalClusterNorm": int(global_cluster_norm),
+                "localClusterNorm": int(local_cluster_norm)
             }
         })
 
