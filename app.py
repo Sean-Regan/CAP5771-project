@@ -13,7 +13,7 @@ MAPBOX_API_KEY = os.getenv('MAPBOX_API_KEY')
 ENDPOINT = "http://localhost:8000"
 
 # Connect to the database
-conn = sqlite3.connect("./data/nutrition.db")
+conn = sqlite3.connect("./data/nutrition.db", check_same_thread=False)
 cur = conn.cursor()
 
 app = Flask(__name__)
@@ -35,27 +35,39 @@ def home():
 def api_get_clusters():
     return model_interface.get_clusters(5000)
 
-@app.route('/api/nutrition')
+@app.route('/api/nutrient_info')
 def api_get_nutrition_info():
     conn.create_function('normalize_text', 1, normalize_text)
 
     search_name = request.args.get('name')
-    search_brand = request.args.get('brand')
     search_nutrient = request.args.get('nutrient')
 
     wal_df = pd.read_sql_query("""
-                       SELECT clean_desc, name, MIN(amount) as amount, MIN(price_retail) as price
+                       SELECT clean_desc, name, amount, price_retail as price, shipping_location as zip
                        FROM wal_nutrient
-                       WHERE product_name LIKE ? AND clean_brand LIKE ? AND normalize_text(name) LIKE ?
-                       GROUP BY clean_desc, name
-                       """, conn, params=(f"%{search_name.value}%", f"%{normalize_text(search_brand.value)}%", f"%{normalize_text(search_nutrient.value)}%"))
+                       WHERE product_name LIKE ? AND normalize_text(name) LIKE ?
+                       """, conn, params=(f"%{search_name}%", f"%{normalize_text(search_nutrient)}%"))
     
     wf_df = pd.read_sql_query("""
-                       SELECT clean_desc, name, MIN(amount) as amount, MIN(price) as price
+                       SELECT clean_desc, name, amount, price, zip_code as zip
                        FROM wf_nutrient
-                       WHERE product_name LIKE ? AND clean_brand LIKE ? AND normalize_text(name) LIKE ?
-                       GROUP BY clean_desc, name
-                       """, conn, params=(f"%{search_name.value}%", f"%{normalize_text(search_brand.value)}%", f"%{normalize_text(search_nutrient.value)}%"))
+                       WHERE product_name LIKE ? AND normalize_text(name) LIKE ?
+                       """, conn, params=(f"%{search_name}%", f"%{normalize_text(search_nutrient)}%"))
+    
+    wal_df["store"] = "Walmart"
+    wf_df["store"] = "Whole Foods"
+
+    df = pd.concat([wal_df, wf_df])
+    
+    points = df.apply(lambda row: {
+        "x": row["price"],
+        "y": row["amount"],
+        "label": row["clean_desc"],
+        "zip": row["zip"],
+        "store": row["store"]
+    }, axis=1).tolist()
+
+    return jsonify(points)
 
 if __name__ == '__main__':
     model_interface.init_clusters(conn, cur)

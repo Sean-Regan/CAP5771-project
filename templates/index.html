@@ -17,8 +17,6 @@
         const MAPBOX_API_KEY = "{{ MAPBOX_API_KEY }}"
         const ENDPOINT = "{{ ENDPOINT }}"
     </script>
-    <script src="{{ ENDPOINT }}/static/map.js"></script>
-    <link href="{{ ENDPOINT }}/static/map.css" rel="stylesheet">
 </head>
 
 <body>
@@ -50,14 +48,14 @@
 
                     <h3>Grocery Store Price vs Nutrient Analysis</h3>
 
-                    <form id="predictionForm">
-                        <label for="name" class="form-label">Product Name</label>
-                        <input id="name" class="form-control mb-2" type="text">
+                    <form id="nutrientForm">
+                        <label for="product_name" class="form-label">Product Name</label>
+                        <input id="product_name" class="form-control mb-2" type="text">
 
-                        <label for="brand" class="form-label">Product Brand</label>
-                        <input id="brand" class="form-control mb-2" type="brand">
+                        <label for="nutrient" class="form-label">Nutrient</label>
+                        <input id="nutrient" class="form-control mb-2" type="text">
 
-                        <button class="btn btn-primary">Filter</button>
+                        <button type="submit" class="btn btn-primary btn-lg">Filter</button>
                     </form>
 
                     <div style="width: 800px"><canvas id="chartContainer"></canvas></div>
@@ -67,27 +65,81 @@
     </div>
 </body>
 
-<script>
-    const ctx = document.getElementById('chartContainer');
+<script src="{{ ENDPOINT }}/static/map.js"></script>
+<link href="{{ ENDPOINT }}/static/map.css" rel="stylesheet">
 
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-            datasets: [{
-                label: '# of Votes',
-                data: [12, 19, 3, 5, 2, 3],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
+<script>
+    let chart = null;
+
+    function groupByStore(data) {
+        const groups = { "Walmart": [], "Whole Foods": [] };
+
+        data.forEach(d => {
+            groups[d.store].push({
+                x: d.x,
+                y: d.y,
+                label: d.label,
+                zip: d.zip
+            });
+        });
+
+        // Assign colors per store
+        const colors = {
+            "Walmart": "rgba(0, 123, 255, 0.7)",      // blue
+            "Whole Foods": "rgba(40, 167, 69, 0.7)"   // green
+        };
+
+        return Object.entries(groups).map(([store, points]) => ({
+            label: store,
+            data: points,
+            backgroundColor: colors[store],
+            borderColor: colors[store],
+            pointRadius: 5
+        }));
+    }
+
+    document.getElementById('nutrientForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const params = new URLSearchParams();
+        params.append("name", product_name.value)
+        params.append("nutrient", nutrient.value)
+
+        try {
+            const res = await fetch(`{{ ENDPOINT }}/api/nutrient_info?${params}`)
+            const data = await res.json();
+            if (data.error) throw new Error(data.error);
+            const datasets = groupByStore(data);
+
+            if (chart) {
+                chart.destroy();
             }
+
+            chart = new Chart(document.getElementById("chartContainer"), {
+                type: "scatter",
+                data: { datasets },
+                options: {
+                    parsing: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const p = context.raw;
+                                    return `${p.label} (ZIP: ${p.zip})`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: "Price" } },
+                        y: { title: { display: true, text: "Amount" } }
+                    }
+                }
+            });
+        } catch (err) {
+            alert(err.message);
         }
-    });
+    })
 </script>
 
 </html>
