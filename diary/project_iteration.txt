@@ -1,3 +1,9 @@
-- What feedback did your team receive during the iteration session?
-- What are the most important next steps for improving your project?
-- What part of your project still needs the most work?
+During the feedback session we were advised that our dashboard did not properly explain what the user was seeing.
+We added an explanation to the map page to help the user understand what they were seeing.
+
+In terms of next steps, we could add more products to our existing dataset, as well ass introduce other stores' price data.
+In addition, we could improve our understanding of the clustering, and give procedural explainers to indicate what they might indicate.
+
+The frontend of our project probably needs the most work.
+Neither of us is a frontend developer, so the JavaScript and styling are likely not as organized or polished as they could be with a proper development team.
+In addition, there is always room to add more analysis to our frontend.
