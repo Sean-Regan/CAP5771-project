@@ -2,6 +2,9 @@ const CLUSTER_LINK_TEXT = "#cluster";
 
 let MapLoaded = false;
 
+let selectedFeature = null;
+const card = document.getElementById('map-overlay');
+
 document.addEventListener("DOMContentLoaded", (event) => {
     const tabEl = document.querySelector('a[data-bs-toggle="tab"]');
     
@@ -18,6 +21,19 @@ document.addEventListener("DOMContentLoaded", (event) => {
     })
 });
 
+const showCard = (feature) => {
+    console.log('showing card');
+    card.innerHTML = `
+        <div class="map-overlay-inner">
+            <code>Point Properties</code><hr>
+            ${Object.entries(feature.properties)
+                .map(([key, value]) => `<li><b>${key}</b>: ${value}</li>`)
+                .join('')}
+        </div>`;
+
+    card.style.display = 'block';
+};
+
 const loadMap = () => {
     mapboxgl.accessToken = MAPBOX_API_KEY;
     MapLoaded = true;
@@ -31,7 +47,8 @@ const loadMap = () => {
     map.on('load', () => {
         map.addSource('clusters-source', {
             'type': 'geojson',
-            'data': `${ENDPOINT}/api/get-clusters.geojson`
+            'data': `${ENDPOINT}/api/get-clusters.geojson`,
+            'generateId': true
         });
 
         map.addLayer({
@@ -95,7 +112,58 @@ const loadMap = () => {
                 'circle-stroke-width': 2,
                 'circle-stroke-color': 'white'
             }
-        });        
+        });
+
+        const toggleableLayerIds = ['local-norm-layer', 'local-layer', 'global-layer'];
+        
+        for (const layer of toggleableLayerIds) {
+            map.addInteraction(`click-${layer}`, {
+                type: 'click',
+                target: { layerId: layer },
+                handler: ({ feature }) => {
+                    if (selectedFeature) {
+                        map.setFeatureState(selectedFeature, { selected: false });
+                    }
+
+                    selectedFeature = feature;
+                    map.setFeatureState(feature, { selected: true });
+                    showCard(feature);
+                }
+            });
+
+            // Clicking on the map will deselect the selected feature
+            map.addInteraction(`map-click-${layer}`, {
+                type: 'click',
+                handler: () => {
+                    if (selectedFeature) {
+                        map.setFeatureState(selectedFeature, { selected: false });
+                        selectedFeature = null;
+                        card.style.display = 'none';
+                    }
+                }
+            });
+
+            // Hovering over a feature will highlight it
+            map.addInteraction(`mouseenter-${layer}`, {
+                type: 'mouseenter',
+                target: { layerId: layer },
+                handler: ({ feature }) => {
+                    map.setFeatureState(feature, { highlight: true });
+                    map.getCanvas().style.cursor = 'pointer';
+                }
+            });
+
+            // Moving the mouse away from a feature will remove the highlight
+            map.addInteraction(`mouseleave-${layer}`, {
+                type: 'mouseleave',
+                target: { layerId: layer },
+                handler: ({ feature }) => {
+                    map.setFeatureState(feature, { highlight: false });
+                    map.getCanvas().style.cursor = '';
+                    return false;
+                }
+            });
+        }
     });
 
     map.on('idle', () => {
@@ -148,7 +216,7 @@ const loadMap = () => {
                 );  
             }
 
-            const layers = document.getElementById('map-overlay');
+            const layers = document.getElementById('map-header');
             layers.appendChild(link);
         }
     });

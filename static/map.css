@@ -1,9 +1,9 @@
-#map-overlay {
+#map-header {
     display: flex;
     flex-direction: row;
 }
 
-#map-overlay a {
+#map-header a {
     font-size: 13px;
     color: #404040;
     display: block;
@@ -15,20 +15,38 @@
     text-align: center;
 }
 
-#map-overlay a:last-child {
+#map-header a:last-child {
     border: none;
 }
 
-#map-overlay a:hover {
+#map-header a:hover {
     background-color: #f8f8f8;
     color: #404040;
 }
 
-#map-overlay a.active {
+#map-header a.active {
     background-color: #3887be;
     color: #ffffff;
 }
 
-#map-overlay a.active:hover {
+#map-header a.active:hover {
     background: #3074a4;
+}
+
+#map-overlay {
+    display: none;
+    font: 12px/20px sans-serif;
+    padding: 10px;
+    position: absolute;
+    right: 0;
+    top: 10%;
+    width: 230px;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.map-overlay-inner {
+    background: #fff;
+    padding: 10px;
+    border-radius: 3px;
 }
