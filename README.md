@@ -42,3 +42,11 @@ You can modify bounds as you see fit by modifying those constants.
 ## Running the Milestone2 Jupyter Notebooks
 - same as above, instead opening and running 'data_wrangling.ipynb', then 'data_modeling.ipynb', then 'data_visualization_static.ipynb'
 - note that the first time running might take quite a while depending on your machine
+
+## Deploy the final app locally
+- Set up database with the previous Jupyter Notebooks
+- Install requirements with `pip install -r requirements.txt`
+- Get Mapbox API key and add to .env file in the format `MAPBOX_API_KEY=keytext`
+- Run the local server with `python app.py`
+- Navigate to localhost:8000 in the browser
+  - Note that if you wish to host on a domain or different port, you will need to change the constant `ENDPOINT` at the top of `app.py`
