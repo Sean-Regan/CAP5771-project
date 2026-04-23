@@ -127,7 +127,7 @@ def create_clusters(conn):
     finalized_nutrients.to_sql(name='finalized_nutrients', con=conn, if_exists='replace', index=False)
 
     global nutrients_arr
-    nutrients_arr = encoded_nutrients
+    nutrients_arr = pd.read_sql_query('SELECT * FROM finalized_nutrients f JOIN nutrient n WHERE f.nutrient_id = n.id', con=conn)
 
 def init_clusters(conn, cursor):
     print("Initializing clusters...")
@@ -136,7 +136,7 @@ def init_clusters(conn, cursor):
         create_clusters(conn)
     else:
         print("Reading from table...")
-        nutrients = pd.read_sql_query('SELECT * FROM finalized_nutrients', con=conn)
+        nutrients = pd.read_sql_query('SELECT * FROM finalized_nutrients f JOIN nutrient n WHERE f.nutrient_id = n.id', con=conn)
         global nutrients_arr
         nutrients_arr = nutrients
 
@@ -154,6 +154,7 @@ def get_clusters(max_clusters=500):
         price = row.price
         lat = row.latitude
         lon = row.longitude
+        name = row['name']
         global_cluster = row.global_residual_cluster
         local_cluster = row.loc_cluster
         local_cluster_norm = row.loc_cluster_norm
@@ -164,7 +165,8 @@ def get_clusters(max_clusters=500):
                 "coordinates": [float(lon) + lon_offset, float(lat) + lat_offset]
             },
             "properties": {
-                "nutrient": int(nutrient),
+                "nutrientId": int(nutrient),
+                "nutrientName": name,
                 "price": float(price),
                 "globalCluster": int(global_cluster),
                 "localCluster": int(local_cluster),

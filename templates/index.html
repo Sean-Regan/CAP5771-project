@@ -44,13 +44,38 @@
                         <h4>How to Read this Map</h4>
                         <p>
                             This map shows generated clusters of nutrients and their associated price information.
-                            Points closer to dark red imply the price of that nutrient is closer to the baseline price
-                            it was predicted to be.
-                            Those closer to blue imply the price of that nutrient is farther from the baseline price it
-                            was predicted to be.
+                            Points closer to dark red imply the price of that nutrient is closer to the baseline price it was predicted to be.
+                            Those closer to blue imply the price of that nutrient is farther from the baseline price it was predicted to be.
+                            Note that just because a cluster is a high value, it is not necessarily an indication of price gouging, 
+                            as sales (which will have negatively high residuals) will also be clustered with a higher number.
                         </p>
-                        <p>Click any point to view its cluster, USDA nutrient ID, and its price.</p>
+                        <p>Click any point to view its clusters, USDA nutrient ID, and its price.</p>
+                        <details>
+                            <summary>Technical explanations of each layer</summary>
+                            <ul>
+                                <li>
+                                    <strong>Global layer:</strong>
+                                    This uses residuals trained across the entire country, with zip codes taken in as a parameter.
+                                    This will help you visualize general trends across the country, but not so much anything about individual nutrients.
+                                </li>
+                                <li>
+                                    <strong>Local Layer:</strong>
+                                    This uses residuals trained in each locality.
+                                    Since the values are not normalized, unlike the next layer, 
+                                    this is a good way to get a general idea of the spread of how close to its typical value an individual nutrient is priced for its area.
+                                    View this as a way of viewing general trends in a given area.
+                                </li>
+                                <li>
+                                    <strong>Local Layer Normalized:</strong>
+                                    This uses residuals trained in each locality that have been min-max normalized.
+                                    Since the range given to the clustering algorithm is much more constrained, 
+                                    the clusters you see here are much more responsive to slight deviations from their local pricing.
+                                    This would be what you would want to check for a good indication of a specific nutrient being over (or under) priced.
+                                </li>
+                            </ul>
+                        </details>
                     </div>
+
 
                 </div>
             </div>
